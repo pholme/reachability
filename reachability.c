@@ -23,7 +23,7 @@ void merge_reachable (TIMESTEP *t) {
 			you = t->nb[i][j];
 			for (k = 0; k < g.nu; k++) n[me].rnow[k] |= n[you].rlast[k]; // merging reachable nodes by bit-wise or
 		}
-		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[me].rlast[j]];
+		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[me].rlast[j]]; // counting reachable nodes
 		n[me].reach += DIFF(n[me].tlast, t->time) * (double) nr; // weighing by the time since last update
 		n[me].tlast = t->time; // remembering the time of this time step
 	}
@@ -54,7 +54,7 @@ int main (int argc, char *argv[]) {
 	}
 	for (i = g.nts - 1; i > 0; i--) merge_reachable(ts + i); // go through contacts backward in time
 	for (i = 0; i < g.n; i++) {
-		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]];
+		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]]; // counting reachable nodes
 		n[i].reach += n[i].tlast * nr; // adding contributions between t = 0 and the first contact
 	}
 
@@ -71,7 +71,7 @@ int main (int argc, char *argv[]) {
 
 	for (i = 0; i < g.nts; i++) merge_reachable(ts + i); // go through contacts forward in time
 	for (i = 0; i < g.n; i++) {
-		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]];
+		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]]; // counting reachable nodes
 		n[i].reach += (g.dur - n[i].tlast) * nr; // adding contributions between t = 0 and the first contact
 	}
 
