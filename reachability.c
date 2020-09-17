@@ -52,7 +52,7 @@ int main (int argc, char *argv[]) {
 		n[i].rnow[i >> 4] = 1 << (i & 0xf); // initialize the array of reachable nodes (from one node)
 		n[i].tlast = g.dur;
 	}
-	for (i = g.nts - 1; i > 0; i--) merge_reachable(ts + i);
+	for (i = g.nts - 1; i > 0; i--) merge_reachable(ts + i); // go through contacts backward in time
 	for (i = 0; i < g.n; i++) {
 		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]];
 		n[i].reach += n[i].tlast * nr; // adding contributions between t = 0 and the first contact
@@ -69,7 +69,7 @@ int main (int argc, char *argv[]) {
 		n[i].reach = 0.0;
 	}
 
-	for (i = 0; i < g.nts; i++) merge_reachable(ts + i);
+	for (i = 0; i < g.nts; i++) merge_reachable(ts + i); // go through contacts forward in time
 	for (i = 0; i < g.n; i++) {
 		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]];
 		n[i].reach += (g.dur - n[i].tlast) * nr; // adding contributions between t = 0 and the first contact
