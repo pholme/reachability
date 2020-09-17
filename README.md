@@ -1,4 +1,4 @@
-#Calculating the forward and backward reachability of temporal networks#
+# Calculating the forward and backward reachability of temporal networks
 
 To compile:
 1. Make sure `gcc` is installed.
