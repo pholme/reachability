@@ -30,7 +30,7 @@ typedef struct TIMESTEP {
 typedef struct NODE { // node centric information
 	uint16_t *rnow, *rlast;
 	unsigned int tlast; // number of reachable nodes, number of reachable nodes at previous contact, time of last contact
-	double reach; // reachabilities
+	double forward, backward; // reachabilities
 } NODE;
 
 typedef struct CONTACT { // only a helping struct for reading the data files
