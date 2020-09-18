@@ -24,7 +24,7 @@ void merge_reachable (TIMESTEP *t) {
 			for (k = 0; k < g.nu; k++) n[me].rnow[k] |= n[you].rlast[k]; // merging reachable nodes by bit-wise or
 		}
 		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[me].rlast[j]]; // counting reachable nodes
-		n[me].backward += DIFF(n[me].tlast, t->time) * (double) nr; // weighing by the time since last update
+		n[me].forward += DIFF(n[me].tlast, t->time) * (double) nr; // weighing by the time since last update
 		n[me].tlast = t->time; // remembering the time of this time step
 	}
 }
@@ -47,7 +47,7 @@ int main (int argc, char *argv[]) {
 	// creating look-up table for counting 1s in (16-bit) bit-fields
 	for (i = 0; i < 0x10000; i++) g.ones[i] = (i & 1) + g.ones[i >> 1];
 
-	// forward reachability
+	// backward reachability
 	for (i = 0; i < g.n; i++) {
 		n[i].rnow[i >> 4] = 1 << (i & 0xf); // initialize the array of reachable nodes (from one node)
 		n[i].tlast = g.dur;
@@ -55,27 +55,27 @@ int main (int argc, char *argv[]) {
 	for (i = g.nts - 1; i > 0; i--) merge_reachable(ts + i); // go through contacts backward in time
 	for (i = 0; i < g.n; i++) {
 		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]]; // counting reachable nodes
-		n[i].backward += n[i].tlast * nr; // adding contributions between t = 0 and the first contact
+		n[i].forward += n[i].tlast * nr; // adding contributions between t = 0 and the first contact
 	}
 
-	// backward reachability
+	// forward reachability
 	for (i = 0; i < g.n; i++) {
-		n[i].forward = n[i].backward;
+		n[i].backward = n[i].forward;
 		for (j = 0; j < g.nu; j++) n[i].rnow[j] = n[i].rlast[j] = 0;
 		n[i].rnow[i >> 4] = 1 << (i & 0xf); // initialize the array of reachable nodes (from one node)
 		n[i].tlast = 0;
-		n[i].backward = 0.0;
+		n[i].forward = 0.0;
 	}
 
 	for (i = 0; i < g.nts; i++) merge_reachable(ts + i); // go through contacts forward in time
 	for (i = 0; i < g.n; i++) {
 		for (j = nr = 0; j < g.nu; j++) nr += g.ones[n[i].rnow[j]]; // counting reachable nodes
-		n[i].backward += (g.dur - n[i].tlast) * nr; // adding contributions between t = 0 and the first contact
+		n[i].forward += (g.dur - n[i].tlast) * nr; // adding contributions between t = 0 and the first contact
 	}
 
 	// printing
 	d = (1.0 / g.dur) / g.n;
-	for (i = 0; i < g.n; i++) printf("%u %g %g\n", i, n[i].forward * d, n[i].backward * d);
+	for (i = 0; i < g.n; i++) printf("%u %g %g\n", n[i].forward * d, i, n[i].backward * d);
 
 	// free things
 	for (i = 0; i < g.nts; i++) {
